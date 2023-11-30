@@ -7,3 +7,4 @@ loguru
 peewee
 psycopg2-binary
 peewee-migrate
+glpi-api
