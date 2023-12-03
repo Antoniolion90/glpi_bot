@@ -1,20 +1,39 @@
 import glpi_api
-from aiogram.types import Message
+from aiogram.dispatcher.filters import Regexp
+from aiogram.types import Message, CallbackQuery
+
+from bot.keyboards.inline import get_ticket_info_markup
+from data import config
 from loader import dp
+from models import User
 
+@dp.message_handler(i18n_text='Заявки 🆕')
+async def _menu_spisok_ticket(message: Message, user: User):
 
-@dp.message_handler(i18n_text='menu')
-async def _menu_glpi(message: Message):
-
-    URL = 'https://help.uzairports.com//apirest.php'
-    APPTOKEN = '9ZumD7bMJeXrU0aF8V9UVrMobsSwcvqn26e4diPn'
-    USERTOKEN = '6oussx3qkS6ILN77fOmp9ZtC7sWrSXGcCxlmlV3R'
     try:
-        with glpi_api.connect(url=URL, apptoken=APPTOKEN, auth=('a.postnikov', 'Nokia0910033@')) as glpi:
-            print(glpi.add('Ticket',
-                     {'type': 2, 'urgency': 5, 'name': 'Тестовая заявка', 'content': 'Тест примерно'}))
+        with glpi_api.connect(url=config.URL_GLPI, apptoken=config.APPTOKEN_GLPI, auth=user.token_user) as glpi:
+
+            spisok = glpi.get_all_items('Ticket')
+
+            await message.answer('Ваши заявки: ', reply_markup=get_ticket_info_markup(spisok))
 
     except glpi_api.GLPIError as err:
-        print(str(err))
+        await message.answer(str(err))
 
-    await message.answer('привет')
+@dp.callback_query_handler(Regexp('ticket_'))
+async def _menu_number_ticket(callback_query: CallbackQuery, user: User):
+    code = callback_query.data[7:]
+
+    await callback_query.message.edit_reply_markup(reply_markup=None)
+
+    try:
+        with glpi_api.connect(url=config.URL_GLPI, apptoken=config.APPTOKEN_GLPI, auth=user.token_user) as glpi:
+
+            spisok = glpi.get_item('Ticket', code)
+
+            text = f'#{spisok["id"]}. Название: {spisok["name"]} \nОписание: {spisok["content"]} \nДата открытия: {spisok["date"]}'
+
+    except glpi_api.GLPIError as err:
+        text = str(err)
+
+    await callback_query.message.answer(text)

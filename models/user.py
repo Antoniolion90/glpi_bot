@@ -9,7 +9,9 @@ class User(BaseModel):
     id = BigIntegerField(primary_key=True)
     name = CharField(default=None)
     username = CharField(default=None, null=True)
-    language = CharField(default='en')
+    language = CharField(default='ru')
+    email = CharField(null=True)
+    token_user = CharField(null=True)
 
     is_admin = BooleanField(default=False)
 
