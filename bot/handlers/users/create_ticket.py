@@ -57,8 +57,9 @@ async def _change_glpi_urgency_ticket(callback_query: CallbackQuery, state: FSMC
 
     try:
         with glpi_api.connect(url=config.URL_GLPI, apptoken=config.APPTOKEN_GLPI, auth=user.token_user) as glpi:
-            text = str(glpi.add('Ticket', {'type': ticket_type, 'urgency': ticket_urgency, 'requesttypes_id': 8, 'name': ticket_name, 'content': ticket_content}))
-
+            profile = glpi.get_config()
+            mess = glpi.add('Ticket', {'_users_id_requester': profile['cfg_glpi']['lock_lockprofile_id'], 'type': ticket_type, 'urgency': ticket_urgency, 'requesttypes_id': 8, 'name': ticket_name, 'content': ticket_content})
+            text = str(mess[0]['message'])
     except glpi_api.GLPIError as err:
         text = str(err)
 
