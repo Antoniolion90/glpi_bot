@@ -9,6 +9,7 @@ from data import config
 from loader import dp
 from models import User
 
+
 @dp.message_handler(i18n_text='Создать заявку ➕')
 async def _menu_glpi_ticket(message: Message):
 
@@ -59,8 +60,8 @@ async def _default_content_ticket(message: Message, state: FSMContext, user: Use
 
     try:
         with glpi_api.connect(url=config.URL_GLPI, apptoken=config.APPTOKEN_GLPI, auth=user.token_user) as glpi:
-            profile = glpi.get_config()
-            mess = glpi.add('Ticket', {'_users_id_requester': profile['cfg_glpi']['lock_lockprofile_id'], 'type': ticket_type, 'urgency': ticket_urgency, 'requesttypes_id': 8, 'name': ticket_name, 'content': ticket_content})
+            profile = glpi.get_full_session()
+            mess = glpi.add('Ticket', {'_users_id_requester': profile['glpiID'], 'type': ticket_type, 'urgency': ticket_urgency, 'requesttypes_id': 8, 'name': ticket_name, 'content': ticket_content})
             text = str(mess[0]['message'])
     except glpi_api.GLPIError as err:
         text = str(err)
