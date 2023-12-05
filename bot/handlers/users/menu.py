@@ -31,7 +31,7 @@ async def _menu_number_ticket(callback_query: CallbackQuery, user: User):
 
             spisok = glpi.get_item('Ticket', code)
 
-            text = f'#{spisok["id"]}. Название: {spisok["name"]} \nОписание: {spisok["content"]} \nДата открытия: {spisok["date"]}'
+            text = f'#{spisok["id"]}. Название заявки: {spisok["name"]} \nОписание: {spisok["content"]} \nДата открытия: {spisok["date"]} \nНазначенный специалист: \nСтатус заявки: {spisok["status"]}'
 
     except glpi_api.GLPIError as err:
         text = str(err)
