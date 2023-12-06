@@ -31,7 +31,17 @@ async def _menu_number_ticket(callback_query: CallbackQuery, user: User):
 
             spisok = glpi.get_item('Ticket', code)
 
-            text = f'#{spisok["id"]}. Название заявки: {spisok["name"]} \nОписание: {spisok["content"]} \nДата открытия: {spisok["date"]} \nНазначенный специалист: \nСтатус заявки: {spisok["status"]}'
+            criteria = [{'field': 2, 'searchtype': 'contains', 'value': code}]
+            forcedisplay = [1, 5]  # name, specialist
+            specialist_id = glpi.search('Ticket', criteria=criteria, forcedisplay=forcedisplay)
+
+            if (specialist_id[0]["5"] == None):
+                specialist_name = 'не назначен'
+            else:
+                specialist_n = glpi.get_multiple_items({'itemtype': 'User', 'items_id': specialist_id[0]["5"]})
+                specialist_name = str(specialist_n[0]["name"])
+
+            text = f'#{spisok["id"]}. Название заявки: {spisok["name"]} \nОписание: {spisok["content"]} \nДата открытия: {spisok["date"]} \nНазначенный специалист: {specialist_name} \nСтатус заявки: {config.STATUS_GLPI[spisok["status"]]}'
 
     except glpi_api.GLPIError as err:
         text = str(err)
