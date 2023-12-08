@@ -3,18 +3,11 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Regexp
 from aiogram.types import Message, CallbackQuery
 
-from bot.keyboards.inline import get_type_ticket_markup, get_urgency_ticket_markup
+from bot.keyboards.inline import get_urgency_ticket_markup
 from bot.states import AddTicket
 from data import config
 from loader import dp
 from models import User
-
-
-@dp.message_handler(i18n_text='Создать заявку ➕')
-async def _menu_glpi_ticket(message: Message):
-
-    await AddTicket.AT1.set()
-    await message.answer('Выберите тип заявки:', reply_markup=get_type_ticket_markup())
 
 @dp.callback_query_handler(Regexp('type_'), state=AddTicket.AT1)
 async def _change_glpi_ticket_type(callback_query: CallbackQuery, state: FSMContext):
@@ -37,8 +30,6 @@ async def _change_glpi_urgency_ticket(callback_query: CallbackQuery, state: FSMC
     await state.update_data(answer2=ticket_urgency)
     await callback_query.message.answer('Напишите название заявки:')
     await AddTicket.next()
-
-
 
 @dp.message_handler(state=AddTicket.AT3)
 async def _default_name_ticket(message: Message, state: FSMContext):

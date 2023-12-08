@@ -6,8 +6,8 @@ from loader import _
 def get_default_markup(user):
     markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=3)
 
-    markup.add(_('Заявки 🆕'))
-    markup.add(_('Создать заявку ➕'))
+    markup.add(_('Заявки 🆕'), _('Создать заявку ➕'))
+    markup.add(_('Мой профиль 👨‍💼'))
     markup.add(_('Help 🆘'), _('Settings 🛠'))
 
     if user.is_admin:

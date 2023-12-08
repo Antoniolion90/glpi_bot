@@ -1,11 +1,46 @@
+import math
+
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.callback_data import CallbackData
 
 
-def get_ticket_info_markup(spisok):
+def pag_ticket():
+    pag_ticket = CallbackData("ticket", "action", "page")
+    return pag_ticket
+
+
+def get_ticket_info_markup(tickets, page: int = 0):
+
+    count = int(len(tickets))
+    max_list = 5
+
     markup = InlineKeyboardMarkup()
-    for list in spisok:
-        markup.add(InlineKeyboardButton(f'#{list["id"]}. {list["name"]}', callback_data=f'ticket_{list["id"]}'))
+
+    if page == 0:
+        for flight in tickets[page:max_list]:
+            markup.add(depart_tickets_list(flight))
+        if count > 5:
+            markup.row(InlineKeyboardButton(f'📖 {page + 1}/{math.ceil(count / max_list)}', callback_data='pust'),
+                       InlineKeyboardButton('⏭ След.', callback_data=pag_ticket().new(action='next', page=page)))
+
+    elif page == math.ceil((count / max_list) - 1):
+        for flight in tickets[(max_list * page):(page * max_list + max_list)]:
+            markup.add(depart_tickets_list(flight))
+
+        markup.row(InlineKeyboardButton('⏮ Пред.', callback_data=pag_ticket().new(action='prev', page=page)),
+                   InlineKeyboardButton(f'📖 {page + 1}/{math.ceil(count / max_list)}', callback_data='pust'))
+
+    else:
+        for flight in tickets[(max_list * page):(page * max_list + max_list)]:
+            markup.add(depart_tickets_list(flight))
+
+        markup.row(InlineKeyboardButton('⏮ Пред.', callback_data=pag_ticket().new(action='prev', page=page)),
+                   InlineKeyboardButton(f'📖 {page + 1}/{math.ceil(count / max_list)}', callback_data='pust'),
+                   InlineKeyboardButton('⏭ След.', callback_data=pag_ticket().new(action='next', page=page)))
     return markup
+
+def depart_tickets_list(list):
+    return InlineKeyboardButton(f'#{list["id"]}. {list["name"]}', callback_data=f'ticket_{list["id"]}')
 
 def get_type_ticket_markup():
     type_ticket = InlineKeyboardMarkup()
@@ -14,6 +49,7 @@ def get_type_ticket_markup():
     type_ticket.add(InlineKeyboardButton('Запрос', callback_data='type_2'))
 
     return type_ticket
+
 
 def get_urgency_ticket_markup():
     urgency_ticket = InlineKeyboardMarkup()
