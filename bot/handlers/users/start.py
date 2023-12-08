@@ -4,7 +4,8 @@ from aiogram.types import Message
 from aiogram.dispatcher import FSMContext
 from bot.commands import get_admin_commands, get_default_commands
 from bot.commands import set_admin_commands
-from bot.keyboards.default import get_default_markup
+from bot.keyboards.default import get_default_markup, get_default_glpi_token
+from bot.keyboards.inline import get_language_inline_markup
 
 from bot.states import AddToken
 from data import config
@@ -17,24 +18,52 @@ async def _start(message: Message, user: User):
     if user.is_admin:
         await set_admin_commands(user.id, user.language)
 
-    text = ('Привет {full_name}!\n'
-             'Отправьте токен пользователя для авторизации в glpi').format(full_name=user.name)
+    text = _('Hi {full_name}!\n'
+             'Choose your language').format(full_name=user.name)
+
+    await message.answer(text, reply_markup=get_language_inline_markup())
+
+
+@dp.message_handler(i18n_text='Вход в GLPI 🔐')
+async def _start_token(message: Message, user: User):
+    if user.is_admin:
+        await set_admin_commands(user.id, user.language)
+
+    text = ('Отправьте токен пользователя для авторизации в glpi')
 
     await AddToken.AP1.set()
     await message.answer(text)
+
+@dp.message_handler(i18n_text='Выход из GLPI 🚪')
+async def _start_token(message: Message, user: User):
+    query = User.update(token_user=None, glpi_profile_id=None).where(User.id == user.id)
+    query.execute()
+
+    await message.answer(_('Вышли из GLPI'), reply_markup=get_default_glpi_token())
 
 @dp.message_handler(state=AddToken.AP1)
 async def _default_menu(message: Message, state: FSMContext, user: User):
     user_token = message.text
     try:
         with glpi_api.connect(url=config.URL_GLPI, apptoken=config.APPTOKEN_GLPI, auth=user_token) as glpi:
-            query = User.update(token_user=user_token).where(User.id == message.from_id)
+
+            glpi.get_active_profile()
+
+            query = User.update(token_user=user_token, glpi_profile_id=glpi.get_active_profile()["id"]).where(User.id == message.from_id)
             query.execute()
 
-        await message.answer('Успешно авторазовались', reply_markup=get_default_markup(user))
+        await message.answer(_('Успешно авторазовались'), reply_markup=get_default_markup(user))
 
     except glpi_api.GLPIError as err:
-        await message.answer(str(err))
+        oshibka = str(err).split(' ')
+
+        if oshibka[0] == '(ERROR_GLPI_LOGIN_USER_TOKEN)':
+            await message.answer(_('Ошибка. Необходимо авторизоваться! 👇'), reply_markup=get_default_glpi_token())
+        else:
+            await message.answer(str(err))
+    except Exception:
+        await message.answer(_('Неправильный токен. Пройдите авторизацию повторно'), reply_markup=get_default_glpi_token())
+
     await state.finish()
 
 

@@ -12,6 +12,7 @@ class User(BaseModel):
     language = CharField(default='ru')
     email = CharField(null=True)
     token_user = CharField(null=True)
+    glpi_profile_id = BigIntegerField(null=True)
 
     is_admin = BooleanField(default=False)
 
