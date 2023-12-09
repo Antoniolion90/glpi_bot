@@ -7,7 +7,7 @@ def get_default_markup(user):
     markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=3)
 
     markup.add(_('Заявки 🆕'), _('Создать заявку ➕'))
-    markup.add(_('Мой профиль 👨‍💼'), 'Выход из GLPI 🚪')
+    markup.add(_('Мой профиль 👨‍💼'), _('Выход из GLPI 🚪'))
     markup.add(_('Help 🆘'), _('Settings 🛠'))
 
     if user.is_admin:

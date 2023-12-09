@@ -1,9 +1,10 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from loader import _
 
 
 def get_type_profiles_markup():
     type_profile = InlineKeyboardMarkup()
-    type_profile.add(InlineKeyboardButton('Сменить профиль', callback_data='profiles'))
+    type_profile.add(InlineKeyboardButton(_('Сменить профиль'), callback_data='profiles'))
     return type_profile
 
 def get_type_profiles_edit(profiles):

@@ -29,7 +29,7 @@ async def _start_token(message: Message, user: User):
     if user.is_admin:
         await set_admin_commands(user.id, user.language)
 
-    text = ('Отправьте токен пользователя для авторизации в glpi')
+    text = _('Отправьте токен пользователя для авторизации в glpi')
 
     await AddToken.AP1.set()
     await message.answer(text)

@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery
 
 from bot.keyboards.inline import pag_ticket, get_ticket_info_markup
 from data import config
-from loader import dp
+from loader import dp, _
 from models import User
 
 
@@ -52,11 +52,16 @@ async def _menu_number_ticket(callback_query: CallbackQuery, user: User):
             specialist_id = glpi.search('Ticket', criteria=criteria, forcedisplay=forcedisplay)
 
             if (specialist_id[0]["5"] == None):
-                specialist_name = 'не назначен'
+                specialist_name = _('не назначен')
             else:
-                specialist_name = f'назначен (#{specialist_id[0]["5"]})'
+                specialist_name = _('назначен (#{specialist})').format(specialist=specialist_id[0]["5"])
 
-            text = f'#{spisok["id"]}. Название заявки: {spisok["name"]} \nОписание: {spisok["content"]} \nДата открытия: {spisok["date"]} \nНазначенный специалист: {specialist_name} \nСтатус заявки: {config.STATUS_GLPI[spisok["status"]]}\nКол-во комментарий: {specialist_id[0]["27"]}'
+            text = _('#{id}. Название заявки: {name} \n'
+                     'Описание: {content} \n'
+                     'Дата открытия: {date} \n'
+                     'Назначенный специалист: {specialist} \n'
+                     'Статус заявки: {status}\n'
+                     'Кол-во комментарий: {comment}').format(id=spisok["id"], name=spisok["name"], content=spisok["content"], date=spisok["date"], specialist=specialist_name, status=config.STATUS_GLPI[spisok["status"]], comment=specialist_id[0]["27"])
 
     except glpi_api.GLPIError as err:
         text = str(err)

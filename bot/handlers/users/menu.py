@@ -44,7 +44,7 @@ async def _menu_glpi_profile(message: Message, user: User):
 
             for prof in profile:
                 if prof["id"] == user.glpi_profile_id:
-                    await message.answer(f'Ваш профиль: #{prof["id"]} {prof["name"]}', reply_markup=get_type_profiles_markup())
+                    await message.answer(_('Ваш профиль: #{id} {name}').format(id=prof["id"], name=prof["name"]), reply_markup=get_type_profiles_markup())
 
 
     except glpi_api.GLPIError as err:
