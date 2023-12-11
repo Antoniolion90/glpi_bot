@@ -41,7 +41,7 @@ async def _menu_number_edit_profile(callback_query: CallbackQuery, user: User):
             query = User.update(glpi_profile_id=glpi.get_active_profile()["id"]).where(User.id == user.id)
             query.execute()
 
-            await callback_query.message.answer(_('Ваш профиль изменен на {name}')).format(name=glpi.get_active_profile()["name"])
+            await callback_query.message.answer(_('Ваш профиль изменен на {name}').format(name=glpi.get_active_profile()["name"]))
 
     except glpi_api.GLPIError as err:
         await callback_query.message.answer(str(err))
